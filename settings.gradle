@@ -1,4 +1,5 @@
 rootProject.name = 'socket-study'
 include 'demo'
 include 'udp-demo'
+include 'tcp-demo'
 
