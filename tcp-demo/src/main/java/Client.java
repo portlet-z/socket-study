@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 
 /**
  * @author zhangxinzheng
@@ -79,14 +80,35 @@ public class Client {
         //得到 Socket 输入流
         InputStream inputStream = client.getInputStream();
         byte[] buffer = new byte[128];
+        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
+        //byte
+        byteBuffer.put((byte) 126);
+        //char
+        char c = 'a';
+        byteBuffer.putChar(c);
+        //int
+        int i = 2323123;
+        byteBuffer.putInt(i);
+        // bool
+        boolean b = true;
+        byteBuffer.put(b ? (byte) 1 : (byte) 0);
+        // long
+        long l = 3424325453432312321L;
+        byteBuffer.putLong(l);
+        //float
+        float f = 12.1234f;
+        byteBuffer.putFloat(f);
+        //double
+        double d = 432.134242345;
+        byteBuffer.putDouble(d);
+        //String
+        String str = "hello world";
+        byteBuffer.put(str.getBytes());
+
         //发送数据到服务器
-        outputStream.write(new byte[]{1});
+        outputStream.write(buffer, 0, byteBuffer.position() + 1);
         int read = inputStream.read(buffer);
-        if (read > 0) {
-            System.out.println("收到数量：" + read + " 数据：" + new String(buffer, 0, read));
-        } else {
-            System.out.println("没有收到：" + read);
-        }
+        System.out.println("收到数量：" + read);
 
         outputStream.close();
         inputStream.close();

@@ -4,6 +4,7 @@ import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 /**
  * @author zhangxinzheng
@@ -75,10 +76,40 @@ public class Server {
                 //得到套接字流
                 OutputStream outputStream = socket.getOutputStream();
                 InputStream inputStream = socket.getInputStream();
-                byte[] buffer = new byte[128];
+                byte[] buffer = new byte[256];
                 int readCount = inputStream.read(buffer);
+                ByteBuffer byteBuffer = ByteBuffer.wrap(buffer, 0, readCount);
+                //byte
+                byte be = byteBuffer.get();
+                //char
+                char c = byteBuffer.getChar();
+                //int
+                int i = byteBuffer.getInt();
+                //bool
+                boolean b = byteBuffer.get() == 1;
+                //long
+                long l = byteBuffer.getLong();
+                //float
+                float f = byteBuffer.getFloat();
+                //double
+                double d = byteBuffer.getDouble();
+                //String
+                int pos = byteBuffer.position();
+                String str = new String(buffer, pos, readCount - pos - 1);
+
+                System.out.println("收到数量：" + readCount + " 数据：" +
+                        be + "\n" +
+                        c + "\n" +
+                        i + "\n" +
+                        b + "\n" +
+                        l + "\n" +
+                        f + "\n" +
+                        d + "\n" +
+                        str + "\n");
+
                 if (readCount > 0) {
-                    System.out.println("收到数量：" + readCount + " 数据：" + Array.getByte(buffer, 0));
+                    int value = Tools.byteArrayToInt(buffer);
+                    System.out.println("收到数量：" + readCount + " 数据：" + value);
                     outputStream.write(buffer, 0, readCount);
                 } else {
                     System.out.println("没有收到：" + readCount);
