@@ -91,7 +91,7 @@ public class ServerProvider {
                         //直接根据发送者构建一份回送消息
                         DatagramPacket responsePacket = new DatagramPacket(buffer, len, receivePack.getAddress(), responsePort);
                         ds.send(responsePacket);
-                        System.out.println("ServerProvider response to:" + clientIp + "\tport:" + responsePort);
+                        System.out.println("ServerProvider response to:" + clientIp + "\tport:" + responsePort + "\tdataLength:" + len);
                     } else {
                         System.out.println("ServerProvider receive cmd nonsupport; cmd:" + cmd + "\tport:" + port);
                     }
