@@ -1,12 +1,9 @@
 package net.portlet.client.bean;
 
-import lombok.Data;
-
 /**
  * @author zhangxinzheng
  * @date 2019-01-01 22:12
  */
-@Data
 public class ServerInfo {
     private int port;
     private String address;
@@ -23,5 +20,29 @@ public class ServerInfo {
         return "port:" + port + "\n" +
                 "address:" + address + "\n" +
                 "sn:" + sn;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getSn() {
+        return sn;
+    }
+
+    public void setSn(String sn) {
+        this.sn = sn;
     }
 }
