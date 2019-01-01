@@ -79,33 +79,28 @@ public class Client {
         BufferedReader input = new BufferedReader(new InputStreamReader(in));
         //得到 Socket 数据流，并转换为打印流
         OutputStream outputStream = client.getOutputStream();
-        PrintStream socketPrintStream = new PrintStream(outputStream);
-        //得到 Socket 输入流，并转换为 BufferedReader
+        PrintStream printStream = new PrintStream(outputStream);
+
+        //得到 Socket 输入流
         InputStream inputStream = client.getInputStream();
-        byte[] buffer = new byte[256];
-        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-        byteBuffer.put((byte)126);
-        char c = 'a';
-        byteBuffer.putChar(c);
-        int i = 2323123;
-        byteBuffer.putInt(i);
-        boolean b = true;
-        byteBuffer.put(b ? (byte) 1 : (byte) 0);
-        long l = 29878939;
-        byteBuffer.putLong(l);
-        float f = 12.3456f;
-        byteBuffer.putFloat(f);
-        double d = 12.34353;
-        byteBuffer.putDouble(d);
-        String str = "hello";
-        byteBuffer.put(str.getBytes());
-        //发送数据到服务器
-        outputStream.write(buffer, 0, byteBuffer.position() + 1);
-        //接收服务器返回
-        int read = inputStream.read(buffer);
-        System.out.println("收到数量：" + read);
-        //释放资源
-        outputStream.close();
-        inputStream.close();
+        BufferedReader socketBufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+
+        do {
+            //键盘读取一行
+            String line = input.readLine();
+            //发送数据到服务器
+            printStream.println(line);
+
+            String echo = socketBufferedReader.readLine();
+            if ("exit".equals(echo)) {
+                break;
+            } else {
+                System.out.println(echo);
+            }
+        } while (true);
+
+
+        printStream.close();
+        socketBufferedReader.close();
     }
 }
