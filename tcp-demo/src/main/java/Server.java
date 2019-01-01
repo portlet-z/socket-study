@@ -1,7 +1,5 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
+import java.lang.reflect.Array;
 import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
@@ -74,22 +72,20 @@ public class Server {
             super.run();
             System.out.println("新客户端连接：" + socket.getInetAddress() + " Port:" + socket.getPort());
             try {
-                //得到打印流，用于数据输出；服务器回送数据使用
-                PrintStream socketOutput = new PrintStream(socket.getOutputStream());
-                //得到输入流，用于接受数据
-                BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                while (true) {
-                    //客户端拿到一条数据
-                    String line = socketInput.readLine();
-                    if ("exit".equals(line)) {
-                        socketOutput.println("exit");
-                        break;
-                    } else {
-                        //打印到屏幕，并回送数据长度
-                        System.out.println(line);
-                        socketOutput.println("回送：" + line.length());
-                    }
+                //得到套接字流
+                OutputStream outputStream = socket.getOutputStream();
+                InputStream inputStream = socket.getInputStream();
+                byte[] buffer = new byte[128];
+                int readCount = inputStream.read(buffer);
+                if (readCount > 0) {
+                    System.out.println("收到数量：" + readCount + " 数据：" + Array.getByte(buffer, 0));
+                    outputStream.write(buffer, 0, readCount);
+                } else {
+                    System.out.println("没有收到：" + readCount);
+                    outputStream.write(new byte[]{0});
                 }
+                outputStream.close();
+                inputStream.close();
             } catch (Exception e) {
                 System.err.println("链接异常断开");
             } finally {
@@ -100,7 +96,7 @@ public class Server {
                 }
             }
 
-            System.out.println("客户端已关闭");
+            System.out.println("客户端已退出：" + socket.getInetAddress() + " Port:" + socket.getPort());
         }
     }
 }
