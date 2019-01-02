@@ -3,4 +3,5 @@ include 'demo'
 include 'udp-demo'
 include 'tcp-demo'
 include 'p2p'
+include 'tcp-channel'
 
