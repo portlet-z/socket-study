@@ -1,11 +1,12 @@
 package net.portlet.server;
 
-import java.io.BufferedReader;
+import net.portlet.server.handle.ClientHandler;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author zhangxinzheng
@@ -14,9 +15,13 @@ import java.net.Socket;
 public class TCPServer {
     private final int port;
     private ClientListener mListener;
+    private List<ClientHandler> clientHandlerList = new ArrayList<>();
+
+
     public TCPServer(int port) {
         this.port = port;
     }
+
     public boolean start() {
         try {
             ClientListener listener = new ClientListener(port);
@@ -33,11 +38,22 @@ public class TCPServer {
         if (mListener != null) {
             mListener.exit();
         }
+        for (ClientHandler clientHandler : clientHandlerList) {
+            clientHandler.exit();
+        }
+        clientHandlerList.clear();
     }
 
-    private static class ClientListener extends Thread {
+    public void broadcast(String str) {
+        for (ClientHandler clientHandler : clientHandlerList) {
+            clientHandler.send(str);
+        }
+    }
+
+    private class ClientListener extends Thread {
         private ServerSocket server;
         private boolean done = false;
+
         private ClientListener(int port) throws IOException {
             server = new ServerSocket(port);
             System.out.println("服务器信息：" + server.getInetAddress() + " Port:" + server.getLocalPort());
@@ -57,9 +73,14 @@ public class TCPServer {
                     continue;
                 }
                 //客户端构建异步线程
-                ClientHandler clientHandler = new ClientHandler(client);
-                //启动线程
-                clientHandler.start();
+                try {
+                    ClientHandler clientHandler = new ClientHandler(client, handler -> clientHandlerList.remove(handler));
+                    clientHandler.readToPrint();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("客户端连接异常：" + e.getMessage());
+                }
+                //读取数据并打印
             } while (!done);
             System.out.println("服务器已关闭！");
         }
@@ -73,55 +94,4 @@ public class TCPServer {
             }
         }
     }
-
-    /**
-     * 客户端消息处理
-     */
-    private static class ClientHandler extends Thread {
-        private Socket socket;
-        private boolean flag = true;
-
-        ClientHandler(Socket socket) {
-            this.socket = socket;
-        }
-
-        @Override
-        public void run() {
-            super.run();
-            System.out.println("新客户端连接：" + socket.getInetAddress() + " Port:" + socket.getPort());
-            try {
-                //得到打印流，用于数据输出：服务器回送数据使用
-                PrintStream socketOutput = new PrintStream(socket.getOutputStream());
-                //得到输入流，用于接收数据
-                BufferedReader socketInput = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                do {
-                    //客户端拿到一条数据
-                    String line = socketInput.readLine();
-                    if ("exit".equalsIgnoreCase(line)) {
-                        flag = false;
-                        //回送
-                        socketOutput.println("bye");
-                    } else {
-                        //打印到屏幕，并回送数据长度
-                        System.out.println(line);
-                        socketOutput.println("回送：" + line.length());
-                    }
-                } while (flag);
-
-                socketInput.close();
-                socketOutput.close();
-            } catch (Exception e) {
-
-            } finally {
-                //连接关闭
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            System.out.println("客户端已退出：" + socket.getInetAddress() + " Port:" + socket.getPort());
-        }
-    }
-
 }
