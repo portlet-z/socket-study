@@ -76,6 +76,7 @@ public class TCPServer {
                 try {
                     ClientHandler clientHandler = new ClientHandler(client, handler -> clientHandlerList.remove(handler));
                     clientHandler.readToPrint();
+                    clientHandlerList.add(clientHandler);
                 } catch (IOException e) {
                     e.printStackTrace();
                     System.out.println("客户端连接异常：" + e.getMessage());
